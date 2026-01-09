@@ -1,41 +1,11 @@
 body {
-    font-family: Arial, sans-serif;
     text-align: center;
+    font-family: Arial, sans-serif;
+    background-color: #222;
+    color: white;
 }
 
-.board {
-    display: grid;
-    grid-template-columns: repeat(10, 50px);
-    gap: 5px;
-    justify-content: center;
-    margin: 20px auto;
-}
-
-.cell {
-    width: 50px;
-    height: 50px;
-    border: 1px solid #333;
-    position: relative;
-}
-
-.red {
-    background-color: red;
-    border-radius: 50%;
-    width: 80%;
-    height: 80%;
-    margin: auto;
-}
-
-.blue {
-    background-color: blue;
-    border-radius: 50%;
-    width: 80%;
-    height: 80%;
-    margin: auto;
-}
-
-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
+canvas {
+    background-color: #555;
+    border: 3px solid #fff;
 }
