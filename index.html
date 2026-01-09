@@ -1,66 +1,38 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mini RPG — Coding Lentera</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <title>Simple RPG Game</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>Mini RPG</h1>
-    <p class="subtitle">Petualangan kecil: jelajahi, lawan musuh, level up!</p>
-  </header>
 
-  <main class="game-container">
-    <section class="left">
-      <div id="map" class="map" tabindex="0" aria-label="Peta Petualangan"></div>
-      <div class="controls">
-        <div class="hint">Gunakan tombol panah / WASD untuk bergerak. Klik tombol aksi saat bertemu musuh.</div>
-      </div>
-    </section>
+<div class="game">
+  <h1>⚔️ Simple RPG Game</h1>
 
-    <section class="right">
-      <div class="panel stats">
-        <h2>Pemain</h2>
-        <div id="playerName">Pahlawan</div>
-        <ul>
-          <li>Level: <span id="playerLevel">1</span></li>
-          <li>HP: <span id="playerHP">20</span>/<span id="playerMaxHP">20</span></li>
-          <li>ATK: <span id="playerATK">4</span></li>
-          <li>DEF: <span id="playerDEF">1</span></li>
-          <li>EXP: <span id="playerEXP">0</span>/<span id="nextEXP">10</span></li>
-          <li>Rupiah: <span id="gold">0</span> 💰</li>
-        </ul>
-      </div>
+  <div class="status">
+    <div>
+      <h2>Player</h2>
+      <p>HP: <span id="player-hp">100</span></p>
+      <p>Level: <span id="player-level">1</span></p>
+      <p>EXP: <span id="player-exp">0</span></p>
+    </div>
 
-      <div class="panel actions">
-        <h2>Aksi</h2>
-        <div id="battleActions" class="buttons">
-          <button id="attackBtn">Serang</button>
-          <button id="defendBtn">Bertahan</button>
-          <button id="potionBtn">Minum Ramuan</button>
-          <button id="runBtn">Lari</button>
-        </div>
-        <div id="nonBattleActions" class="buttons">
-          <button id="restBtn">Istirahat (Pulih 50%)</button>
-          <button id="saveBtn">Simpan (localStorage)</button>
-          <button id="loadBtn">Muat</button>
-          <button id="resetBtn">Reset</button>
-        </div>
-      </div>
+    <div>
+      <h2>Monster</h2>
+      <p>HP: <span id="monster-hp">80</span></p>
+    </div>
+  </div>
 
-      <div class="panel log">
-        <h2>Log</h2>
-        <div id="logWindow" class="log-window"></div>
-      </div>
-    </section>
-  </main>
+  <div class="actions">
+    <button onclick="attack()">Attack</button>
+    <button onclick="heal()">Heal</button>
+    <button onclick="resetGame()">Reset</button>
+  </div>
 
-  <footer>
-    <small>Dibuat oleh Coding Lentera — contoh mini RPG dengan HTML/CSS/JS</small>
-  </footer>
+  <div class="log" id="log"></div>
+</div>
 
-  <script src="game.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
