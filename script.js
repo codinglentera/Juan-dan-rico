@@ -1,97 +1,59 @@
-let player = {
-  hp: 100,
-  maxHp: 100,
-  level: 1,
-  exp: 0,
-  attack: 10
-};
+const board = document.getElementById("board");
+const diceText = document.getElementById("dice");
+const turnText = document.getElementById("turn");
 
-let monster = {
-  hp: 80,
-  maxHp: 80,
-  attack: 8
-};
+const totalCells = 30;
+let currentPlayer = 0;
 
-function updateUI() {
-  document.getElementById("player-hp").textContent = player.hp;
-  document.getElementById("player-level").textContent = player.level;
-  document.getElementById("player-exp").textContent = player.exp;
-  document.getElementById("monster-hp").textContent = monster.hp;
+const players = [
+    { position: 0, color: "red", name: "Pemain 1 (Merah)" },
+    { position: 0, color: "blue", name: "Pemain 2 (Biru)" }
+];
+
+// Buat papan
+function createBoard() {
+    board.innerHTML = "";
+    for (let i = 0; i < totalCells; i++) {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+
+        players.forEach(player => {
+            if (player.position === i) {
+                const piece = document.createElement("div");
+                piece.classList.add(player.color);
+                cell.appendChild(piece);
+            }
+        });
+
+        board.appendChild(cell);
+    }
 }
 
-function logMessage(msg) {
-  const log = document.getElementById("log");
-  log.innerHTML += msg + "<br>";
-  log.scrollTop = log.scrollHeight;
-}
+function rollDice() {
+    const dice = Math.floor(Math.random() * 6) + 1;
+    diceText.innerText = "Dadu: " + dice;
 
-function attack() {
-  if (player.hp <= 0 || monster.hp <= 0) return;
+    let player = players[currentPlayer];
+    player.position += dice;
 
-  let playerDamage = Math.floor(Math.random() * player.attack) + 5;
-  monster.hp -= playerDamage;
-  logMessage(`Player menyerang monster (${playerDamage} damage)`);
+    if (player.position >= totalCells - 1) {
+        alert(player.name + " MENANG! 🎉");
+        resetGame();
+        return;
+    }
 
-  if (monster.hp <= 0) {
-    monster.hp = 0;
-    winBattle();
-    updateUI();
-    return;
-  }
+    currentPlayer = (currentPlayer + 1) % players.length;
+    turnText.innerText = "Giliran: " + players[currentPlayer].name;
 
-  monsterAttack();
-  updateUI();
-}
-
-function monsterAttack() {
-  let monsterDamage = Math.floor(Math.random() * monster.attack) + 3;
-  player.hp -= monsterDamage;
-  logMessage(`Monster menyerang player (${monsterDamage} damage)`);
-
-  if (player.hp <= 0) {
-    player.hp = 0;
-    logMessage("💀 Player kalah!");
-  }
-}
-
-function heal() {
-  if (player.hp <= 0) return;
-
-  let healAmount = 15;
-  player.hp += healAmount;
-  if (player.hp > player.maxHp) player.hp = player.maxHp;
-
-  logMessage(`Player heal +${healAmount} HP`);
-  monsterAttack();
-  updateUI();
-}
-
-function winBattle() {
-  logMessage("🎉 Monster dikalahkan!");
-  player.exp += 20;
-
-  if (player.exp >= 100) {
-    player.level++;
-    player.exp = 0;
-    player.maxHp += 20;
-    player.attack += 5;
-    player.hp = player.maxHp;
-    logMessage("⬆️ Level Up!");
-  }
-
-  monster.hp = monster.maxHp;
+    createBoard();
 }
 
 function resetGame() {
-  player.hp = 100;
-  player.maxHp = 100;
-  player.level = 1;
-  player.exp = 0;
-  player.attack = 10;
-
-  monster.hp = 80;
-
-  document.getElementById("log").innerHTML = "";
-  updateUI();
+    players.forEach(p => p.position = 0);
+    currentPlayer = 0;
+    turnText.innerText = "Giliran: Pemain 1 (Merah)";
+    diceText.innerText = "Dadu: -";
+    createBoard();
 }
 
+createBoard();
