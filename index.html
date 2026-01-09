@@ -1,38 +1,21 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Simple RPG Game</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Game Ludo Sederhana</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="game">
-  <h1>⚔️ Simple RPG Game</h1>
+<h1>🎲 Game Ludo</h1>
+<p id="turn">Giliran: Pemain 1 (Merah)</p>
 
-  <div class="status">
-    <div>
-      <h2>Player</h2>
-      <p>HP: <span id="player-hp">100</span></p>
-      <p>Level: <span id="player-level">1</span></p>
-      <p>EXP: <span id="player-exp">0</span></p>
-    </div>
+<div class="board" id="board"></div>
 
-    <div>
-      <h2>Monster</h2>
-      <p>HP: <span id="monster-hp">80</span></p>
-    </div>
-  </div>
-
-  <div class="actions">
-    <button onclick="attack()">Attack</button>
-    <button onclick="heal()">Heal</button>
-    <button onclick="resetGame()">Reset</button>
-  </div>
-
-  <div class="log" id="log"></div>
-</div>
+<button onclick="rollDice()">Lempar Dadu</button>
+<p id="dice">Dadu: -</p>
 
 <script src="script.js"></script>
 </body>
 </html>
+
