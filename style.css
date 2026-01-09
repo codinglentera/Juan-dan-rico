@@ -1,37 +1,41 @@
 body {
-  font-family: Arial, sans-serif;
-  background: linear-gradient(#222, #444);
-  color: white;
-  text-align: center;
+    font-family: Arial, sans-serif;
+    text-align: center;
 }
 
-.game {
-  width: 400px;
-  margin: 50px auto;
-  background: #333;
-  padding: 20px;
-  border-radius: 10px;
+.board {
+    display: grid;
+    grid-template-columns: repeat(10, 50px);
+    gap: 5px;
+    justify-content: center;
+    margin: 20px auto;
 }
 
-.status {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
+.cell {
+    width: 50px;
+    height: 50px;
+    border: 1px solid #333;
+    position: relative;
 }
 
-.actions button {
-  margin: 5px;
-  padding: 10px 15px;
-  font-size: 16px;
-  cursor: pointer;
+.red {
+    background-color: red;
+    border-radius: 50%;
+    width: 80%;
+    height: 80%;
+    margin: auto;
 }
 
-.log {
-  margin-top: 15px;
-  background: #111;
-  padding: 10px;
-  height: 120px;
-  overflow-y: auto;
-  font-size: 14px;
-  text-align: left;
+.blue {
+    background-color: blue;
+    border-radius: 50%;
+    width: 80%;
+    height: 80%;
+    margin: auto;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
 }
