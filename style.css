@@ -1,1 +1,37 @@
-/tempat stylish/
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(#222, #444);
+  color: white;
+  text-align: center;
+}
+
+.game {
+  width: 400px;
+  margin: 50px auto;
+  background: #333;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.status {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.actions button {
+  margin: 5px;
+  padding: 10px 15px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.log {
+  margin-top: 15px;
+  background: #111;
+  padding: 10px;
+  height: 120px;
+  overflow-y: auto;
+  font-size: 14px;
+  text-align: left;
+}
