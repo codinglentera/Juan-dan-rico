@@ -3,44 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dodge & Survive</title>
+<title>Impossible Gap</title>
 
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial, sans-serif;
-}
-
 body{
-    background:#0f172a;
+    margin:0;
+    background:#111;
     display:flex;
     justify-content:center;
     align-items:center;
     height:100vh;
     overflow:hidden;
+    font-family:Arial,sans-serif;
 }
 
 canvas{
-    border:3px solid #38bdf8;
-    background:#111827;
-    box-shadow:0 0 20px #38bdf8;
+    background:#222;
+    border:3px solid #fff;
 }
 
-#info{
+#score{
     position:absolute;
     top:15px;
     color:white;
-    font-size:22px;
-    font-weight:bold;
+    font-size:24px;
 }
 </style>
 </head>
 <body>
 
-<div id="info">Skor: <span id="score">0</span></div>
-<canvas id="game" width="800" height="500"></canvas>
+<div id="score">Skor: 0</div>
+<canvas id="game" width="400" height="600"></canvas>
 
 <script>
 const canvas = document.getElementById("game");
@@ -48,74 +41,57 @@ const ctx = canvas.getContext("2d");
 const scoreText = document.getElementById("score");
 
 const player = {
-    x: 400,
-    y: 250,
-    size: 20,
-    speed: 5,
-    color: "#22c55e"
+    x: 180,
+    y: 540,
+    w: 40,
+    h: 40,
+    speed: 7
 };
 
 let keys = {};
-let enemies = [];
 let score = 0;
 let gameOver = false;
-let enemySpeed = 2;
+let obstacleSpeed = 4;
 
-document.addEventListener("keydown", e => {
+const obstacles = [];
+
+document.addEventListener("keydown", e=>{
     keys[e.key] = true;
 
-    if(gameOver && e.key === "r"){
+    if(gameOver && e.key.toLowerCase() === "r"){
         restart();
     }
 });
 
-document.addEventListener("keyup", e => {
+document.addEventListener("keyup", e=>{
     keys[e.key] = false;
 });
 
-function spawnEnemy(){
-    const side = Math.floor(Math.random()*4);
-    let x,y;
+function createObstacle(){
 
-    if(side===0){
-        x=Math.random()*canvas.width;
-        y=-20;
-    }
-    else if(side===1){
-        x=canvas.width+20;
-        y=Math.random()*canvas.height;
-    }
-    else if(side===2){
-        x=Math.random()*canvas.width;
-        y=canvas.height+20;
-    }
-    else{
-        x=-20;
-        y=Math.random()*canvas.height;
-    }
+    const gapWidth = 70; // sengaja sempit
 
-    enemies.push({
-        x,
-        y,
-        size:15 + Math.random()*15
+    const gapX =
+        Math.random() * (canvas.width - gapWidth);
+
+    obstacles.push({
+        y:-30,
+        gapX,
+        gapWidth,
+        h:30,
+        passed:false
     });
 }
 
 setInterval(()=>{
     if(!gameOver){
-        spawnEnemy();
+        createObstacle();
     }
-},700);
+},1000);
 
 function update(){
 
     if(gameOver) return;
-
-    if(keys["ArrowUp"] || keys["w"])
-        player.y -= player.speed;
-
-    if(keys["ArrowDown"] || keys["s"])
-        player.y += player.speed;
 
     if(keys["ArrowLeft"] || keys["a"])
         player.x -= player.speed;
@@ -123,103 +99,121 @@ function update(){
     if(keys["ArrowRight"] || keys["d"])
         player.x += player.speed;
 
-    player.x = Math.max(player.size,
-        Math.min(canvas.width-player.size, player.x));
+    player.x = Math.max(
+        0,
+        Math.min(canvas.width-player.w, player.x)
+    );
 
-    player.y = Math.max(player.size,
-        Math.min(canvas.height-player.size, player.y));
+    obstacles.forEach(ob=>{
 
-    enemies.forEach(enemy=>{
+        ob.y += obstacleSpeed;
 
-        const dx = player.x - enemy.x;
-        const dy = player.y - enemy.y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
+        if(!ob.passed && ob.y > player.y){
+            score++;
+            ob.passed = true;
+        }
 
-        enemy.x += dx/dist * enemySpeed;
-        enemy.y += dy/dist * enemySpeed;
-
-        if(dist < player.size + enemy.size){
-            gameOver = true;
+        if(
+            player.y < ob.y + ob.h &&
+            player.y + player.h > ob.y
+        ){
+            if(
+                player.x < ob.gapX ||
+                player.x + player.w > ob.gapX + ob.gapWidth
+            ){
+                gameOver = true;
+            }
         }
     });
 
-    score += 1;
-    scoreText.textContent = score;
-
-    if(score % 500 === 0){
-        enemySpeed += 0.2;
+    if(score > 0 && score % 10 === 0){
+        obstacleSpeed = 4 + score / 20;
     }
+
+    scoreText.textContent = "Skor: " + score;
 }
 
 function draw(){
 
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    // Background grid
-    ctx.strokeStyle = "rgba(255,255,255,0.05)";
-    for(let i=0;i<canvas.width;i+=40){
-        ctx.beginPath();
-        ctx.moveTo(i,0);
-        ctx.lineTo(i,canvas.height);
-        ctx.stroke();
-    }
-
-    for(let i=0;i<canvas.height;i+=40){
-        ctx.beginPath();
-        ctx.moveTo(0,i);
-        ctx.lineTo(canvas.width,i);
-        ctx.stroke();
-    }
-
     // Player
-    ctx.fillStyle = player.color;
-    ctx.beginPath();
-    ctx.arc(player.x,player.y,player.size,0,Math.PI*2);
-    ctx.fill();
+    ctx.fillStyle = "#00ff88";
+    ctx.fillRect(
+        player.x,
+        player.y,
+        player.w,
+        player.h
+    );
 
-    // Enemies
-    enemies.forEach(enemy=>{
-        ctx.fillStyle="#ef4444";
-        ctx.beginPath();
-        ctx.arc(enemy.x,enemy.y,enemy.size,0,Math.PI*2);
-        ctx.fill();
+    // Obstacles
+    ctx.fillStyle = "#ff4444";
+
+    obstacles.forEach(ob=>{
+
+        ctx.fillRect(
+            0,
+            ob.y,
+            ob.gapX,
+            ob.h
+        );
+
+        ctx.fillRect(
+            ob.gapX + ob.gapWidth,
+            ob.y,
+            canvas.width,
+            ob.h
+        );
     });
 
     if(gameOver){
+
         ctx.fillStyle="rgba(0,0,0,0.7)";
         ctx.fillRect(0,0,canvas.width,canvas.height);
 
         ctx.fillStyle="white";
         ctx.textAlign="center";
 
-        ctx.font="50px Arial";
-        ctx.fillText("GAME OVER", canvas.width/2, 220);
-
-        ctx.font="30px Arial";
-        ctx.fillText("Skor: " + score, canvas.width/2, 280);
+        ctx.font="40px Arial";
+        ctx.fillText(
+            "GAME OVER",
+            canvas.width/2,
+            250
+        );
 
         ctx.font="22px Arial";
-        ctx.fillText("Tekan R untuk restart", canvas.width/2, 330);
+        ctx.fillText(
+            "Skor: " + score,
+            canvas.width/2,
+            300
+        );
+
+        ctx.fillText(
+            "Tekan R untuk ulang",
+            canvas.width/2,
+            340
+        );
     }
 }
 
 function restart(){
-    enemies = [];
-    score = 0;
-    enemySpeed = 2;
-    gameOver = false;
 
-    player.x = 400;
-    player.y = 250;
+    score = 0;
+    obstacleSpeed = 4;
+    obstacles.length = 0;
+
+    player.x = 180;
+
+    gameOver = false;
 }
 
-function gameLoop(){
+function loop(){
     update();
     draw();
-    requestAnimationFrame(gameLoop);
+    requestAnimationFrame(loop);
 }
 
-gameLoop();
+loop();
 </script>
 
 </body>
