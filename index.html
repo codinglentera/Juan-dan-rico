@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Impossible Gap</title>
+<title>Neon Survival</title>
 
 <style>
 body{
     margin:0;
-    background:#111;
+    background:#050816;
     display:flex;
     justify-content:center;
     align-items:center;
@@ -18,22 +18,24 @@ body{
 }
 
 canvas{
-    background:#222;
-    border:3px solid #fff;
+    background:#0f172a;
+    border:3px solid #00e5ff;
+    box-shadow:0 0 20px #00e5ff;
 }
 
-#score{
+#ui{
     position:absolute;
-    top:15px;
+    top:10px;
     color:white;
-    font-size:24px;
+    font-size:22px;
 }
 </style>
 </head>
 <body>
 
-<div id="score">Skor: 0</div>
-<canvas id="game" width="400" height="600"></canvas>
+<div id="ui">Skor: <span id="score">0</span></div>
+
+<canvas id="game" width="800" height="500"></canvas>
 
 <script>
 const canvas = document.getElementById("game");
@@ -41,179 +43,178 @@ const ctx = canvas.getContext("2d");
 const scoreText = document.getElementById("score");
 
 const player = {
-    x: 180,
-    y: 540,
-    w: 40,
-    h: 40,
-    speed: 7
+    x:400,
+    y:250,
+    size:15,
+    speed:6
 };
 
-let keys = {};
 let score = 0;
 let gameOver = false;
-let obstacleSpeed = 4;
+let keys = {};
+let enemies = [];
 
-const obstacles = [];
+document.addEventListener("keydown",(e)=>{
+    keys[e.key]=true;
 
-document.addEventListener("keydown", e=>{
-    keys[e.key] = true;
-
-    if(gameOver && e.key.toLowerCase() === "r"){
+    if(gameOver && e.key.toLowerCase()==="r"){
         restart();
     }
 });
 
-document.addEventListener("keyup", e=>{
-    keys[e.key] = false;
+document.addEventListener("keyup",(e)=>{
+    keys[e.key]=false;
 });
 
-function createObstacle(){
+function addEnemy(){
 
-    const gapWidth = 70; // sengaja sempit
+    let speed = 2 + Math.random()*2;
 
-    const gapX =
-        Math.random() * (canvas.width - gapWidth);
-
-    obstacles.push({
-        y:-30,
-        gapX,
-        gapWidth,
-        h:30,
-        passed:false
+    enemies.push({
+        x:Math.random()*canvas.width,
+        y:Math.random()*canvas.height,
+        size:12 + Math.random()*10,
+        dx:(Math.random()>0.5?1:-1)*speed,
+        dy:(Math.random()>0.5?1:-1)*speed
     });
+}
+
+for(let i=0;i<5;i++){
+    addEnemy();
 }
 
 setInterval(()=>{
     if(!gameOver){
-        createObstacle();
+        addEnemy();
     }
-},1000);
+},5000);
 
 function update(){
 
     if(gameOver) return;
 
-    if(keys["ArrowLeft"] || keys["a"])
-        player.x -= player.speed;
+    if(keys["w"]||keys["ArrowUp"])
+        player.y-=player.speed;
 
-    if(keys["ArrowRight"] || keys["d"])
-        player.x += player.speed;
+    if(keys["s"]||keys["ArrowDown"])
+        player.y+=player.speed;
 
-    player.x = Math.max(
-        0,
-        Math.min(canvas.width-player.w, player.x)
-    );
+    if(keys["a"]||keys["ArrowLeft"])
+        player.x-=player.speed;
 
-    obstacles.forEach(ob=>{
+    if(keys["d"]||keys["ArrowRight"])
+        player.x+=player.speed;
 
-        ob.y += obstacleSpeed;
+    player.x=Math.max(player.size,
+        Math.min(canvas.width-player.size,player.x));
 
-        if(!ob.passed && ob.y > player.y){
-            score++;
-            ob.passed = true;
+    player.y=Math.max(player.size,
+        Math.min(canvas.height-player.size,player.y));
+
+    enemies.forEach(enemy=>{
+
+        enemy.x+=enemy.dx;
+        enemy.y+=enemy.dy;
+
+        if(enemy.x<enemy.size ||
+           enemy.x>canvas.width-enemy.size){
+            enemy.dx*=-1;
         }
 
-        if(
-            player.y < ob.y + ob.h &&
-            player.y + player.h > ob.y
-        ){
-            if(
-                player.x < ob.gapX ||
-                player.x + player.w > ob.gapX + ob.gapWidth
-            ){
-                gameOver = true;
-            }
+        if(enemy.y<enemy.size ||
+           enemy.y>canvas.height-enemy.size){
+            enemy.dy*=-1;
+        }
+
+        const dx=player.x-enemy.x;
+        const dy=player.y-enemy.y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+
+        if(dist < player.size + enemy.size){
+            gameOver=true;
         }
     });
 
-    if(score > 0 && score % 10 === 0){
-        obstacleSpeed = 4 + score / 20;
-    }
-
-    scoreText.textContent = "Skor: " + score;
+    score++;
+    scoreText.textContent=Math.floor(score/10);
 }
 
 function draw(){
 
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    // Player
-    ctx.fillStyle = "#00ff88";
-    ctx.fillRect(
-        player.x,
-        player.y,
-        player.w,
-        player.h
-    );
+    enemies.forEach(enemy=>{
 
-    // Obstacles
-    ctx.fillStyle = "#ff4444";
+        ctx.beginPath();
+        ctx.arc(enemy.x,enemy.y,enemy.size,0,Math.PI*2);
 
-    obstacles.forEach(ob=>{
+        ctx.fillStyle="#ff3b3b";
+        ctx.fill();
 
-        ctx.fillRect(
-            0,
-            ob.y,
-            ob.gapX,
-            ob.h
-        );
-
-        ctx.fillRect(
-            ob.gapX + ob.gapWidth,
-            ob.y,
-            canvas.width,
-            ob.h
-        );
+        ctx.shadowColor="#ff3b3b";
+        ctx.shadowBlur=15;
     });
+
+    ctx.shadowBlur=0;
+
+    ctx.beginPath();
+    ctx.arc(player.x,player.y,player.size,0,Math.PI*2);
+
+    ctx.fillStyle="#00ff88";
+    ctx.fill();
 
     if(gameOver){
 
-        ctx.fillStyle="rgba(0,0,0,0.7)";
+        ctx.fillStyle="rgba(0,0,0,0.75)";
         ctx.fillRect(0,0,canvas.width,canvas.height);
 
         ctx.fillStyle="white";
         ctx.textAlign="center";
 
-        ctx.font="40px Arial";
+        ctx.font="50px Arial";
         ctx.fillText(
             "GAME OVER",
             canvas.width/2,
-            250
+            220
+        );
+
+        ctx.font="28px Arial";
+        ctx.fillText(
+            "Skor: " + Math.floor(score/10),
+            canvas.width/2,
+            280
         );
 
         ctx.font="22px Arial";
         ctx.fillText(
-            "Skor: " + score,
+            "Tekan R untuk bermain lagi",
             canvas.width/2,
-            300
-        );
-
-        ctx.fillText(
-            "Tekan R untuk ulang",
-            canvas.width/2,
-            340
+            330
         );
     }
 }
 
 function restart(){
 
-    score = 0;
-    obstacleSpeed = 4;
-    obstacles.length = 0;
+    score=0;
+    gameOver=false;
+    enemies=[];
 
-    player.x = 180;
+    player.x=400;
+    player.y=250;
 
-    gameOver = false;
+    for(let i=0;i<5;i++){
+        addEnemy();
+    }
 }
 
-function loop(){
+function gameLoop(){
     update();
     draw();
-    requestAnimationFrame(loop);
+    requestAnimationFrame(gameLoop);
 }
 
-loop();
+gameLoop();
 </script>
 
 </body>
