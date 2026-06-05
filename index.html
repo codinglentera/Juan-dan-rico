@@ -1,17 +1,226 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <title>Subway Runner</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dodge & Survive</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:#0f172a;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    overflow:hidden;
+}
+
+canvas{
+    border:3px solid #38bdf8;
+    background:#111827;
+    box-shadow:0 0 20px #38bdf8;
+}
+
+#info{
+    position:absolute;
+    top:15px;
+    color:white;
+    font-size:22px;
+    font-weight:bold;
+}
+</style>
 </head>
 <body>
 
-<h1>🏃 Subway Runner</h1>
-<canvas id="gameCanvas" width="800" height="400"></canvas>
-<p id="score">Skor: 0</p>
-<p>Tekan <b>SPASI</b> untuk lompat</p>
+<div id="info">Skor: <span id="score">0</span></div>
+<canvas id="game" width="800" height="500"></canvas>
 
-<script src="script.js"></script>
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const scoreText = document.getElementById("score");
+
+const player = {
+    x: 400,
+    y: 250,
+    size: 20,
+    speed: 5,
+    color: "#22c55e"
+};
+
+let keys = {};
+let enemies = [];
+let score = 0;
+let gameOver = false;
+let enemySpeed = 2;
+
+document.addEventListener("keydown", e => {
+    keys[e.key] = true;
+
+    if(gameOver && e.key === "r"){
+        restart();
+    }
+});
+
+document.addEventListener("keyup", e => {
+    keys[e.key] = false;
+});
+
+function spawnEnemy(){
+    const side = Math.floor(Math.random()*4);
+    let x,y;
+
+    if(side===0){
+        x=Math.random()*canvas.width;
+        y=-20;
+    }
+    else if(side===1){
+        x=canvas.width+20;
+        y=Math.random()*canvas.height;
+    }
+    else if(side===2){
+        x=Math.random()*canvas.width;
+        y=canvas.height+20;
+    }
+    else{
+        x=-20;
+        y=Math.random()*canvas.height;
+    }
+
+    enemies.push({
+        x,
+        y,
+        size:15 + Math.random()*15
+    });
+}
+
+setInterval(()=>{
+    if(!gameOver){
+        spawnEnemy();
+    }
+},700);
+
+function update(){
+
+    if(gameOver) return;
+
+    if(keys["ArrowUp"] || keys["w"])
+        player.y -= player.speed;
+
+    if(keys["ArrowDown"] || keys["s"])
+        player.y += player.speed;
+
+    if(keys["ArrowLeft"] || keys["a"])
+        player.x -= player.speed;
+
+    if(keys["ArrowRight"] || keys["d"])
+        player.x += player.speed;
+
+    player.x = Math.max(player.size,
+        Math.min(canvas.width-player.size, player.x));
+
+    player.y = Math.max(player.size,
+        Math.min(canvas.height-player.size, player.y));
+
+    enemies.forEach(enemy=>{
+
+        const dx = player.x - enemy.x;
+        const dy = player.y - enemy.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+
+        enemy.x += dx/dist * enemySpeed;
+        enemy.y += dy/dist * enemySpeed;
+
+        if(dist < player.size + enemy.size){
+            gameOver = true;
+        }
+    });
+
+    score += 1;
+    scoreText.textContent = score;
+
+    if(score % 500 === 0){
+        enemySpeed += 0.2;
+    }
+}
+
+function draw(){
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    // Background grid
+    ctx.strokeStyle = "rgba(255,255,255,0.05)";
+    for(let i=0;i<canvas.width;i+=40){
+        ctx.beginPath();
+        ctx.moveTo(i,0);
+        ctx.lineTo(i,canvas.height);
+        ctx.stroke();
+    }
+
+    for(let i=0;i<canvas.height;i+=40){
+        ctx.beginPath();
+        ctx.moveTo(0,i);
+        ctx.lineTo(canvas.width,i);
+        ctx.stroke();
+    }
+
+    // Player
+    ctx.fillStyle = player.color;
+    ctx.beginPath();
+    ctx.arc(player.x,player.y,player.size,0,Math.PI*2);
+    ctx.fill();
+
+    // Enemies
+    enemies.forEach(enemy=>{
+        ctx.fillStyle="#ef4444";
+        ctx.beginPath();
+        ctx.arc(enemy.x,enemy.y,enemy.size,0,Math.PI*2);
+        ctx.fill();
+    });
+
+    if(gameOver){
+        ctx.fillStyle="rgba(0,0,0,0.7)";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+
+        ctx.fillStyle="white";
+        ctx.textAlign="center";
+
+        ctx.font="50px Arial";
+        ctx.fillText("GAME OVER", canvas.width/2, 220);
+
+        ctx.font="30px Arial";
+        ctx.fillText("Skor: " + score, canvas.width/2, 280);
+
+        ctx.font="22px Arial";
+        ctx.fillText("Tekan R untuk restart", canvas.width/2, 330);
+    }
+}
+
+function restart(){
+    enemies = [];
+    score = 0;
+    enemySpeed = 2;
+    gameOver = false;
+
+    player.x = 400;
+    player.y = 250;
+}
+
+function gameLoop(){
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+</script>
+
 </body>
 </html>
